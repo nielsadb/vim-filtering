@@ -62,6 +62,10 @@ let s:UnpackedAttributes = ['include', 'exclude', 'matches', 'match_context_in_r
       \ 'extra', 'context_lines', 'extra_stop_lines', 'extra_stop_pattern',
       \ 'context_extra', 'context_top', 'context_bottom']
 "}}}
+function! FilteringDescription() dict"{{{
+  return '// '. join(self.alt +
+        \ map(self.include, '"&".v:val') + map(self.exclude, '"!".v:val'))
+endfunction"}}}
 function! FilteringOpenResultWindow() dict"{{{
   if self.target == -1 || !bufexists(self.target)
     let self.target = self.createNewResultWindow()
@@ -354,6 +358,7 @@ function! FilteringNew()"{{{
   let s:object_id += 1
   let obj = {
         \'gather'                   : function('FilteringGather'),
+        \'description'              : function('FilteringDescription'),
         \'openResultsWindow'        : function('FilteringOpenResultWindow'),
         \'run'                      : function('FilteringRun'),
         \'return'                   : function('FilteringReturn'),
@@ -448,7 +453,9 @@ function! FilteringCreateNewWindow() dict"{{{
   let max_height = len(self.matches)
         \ + len(self.context_top) * len(self.context_top)
         \ + len(self.context_bottom) * len(self.context_bottom)
+  let g:filtering_target_being_created = self
   wincmd n
+  unlet g:filtering_target_being_created
   if winheight(winnr()) > max_height
     exe 'resize -' . (winheight(winnr()) - max_height)
   endif
@@ -576,6 +583,7 @@ function! <SID>FilteringStub(txt)"{{{
   " TODO: when final, make up to date with interface
   let obj = {
         \'gather'                   : function('FilteringDummyFunction'),
+        \'description'              : function('FilteringDummyFunction'),
         \'openResultsWindow'        : function('FilteringDummyFunction'),
         \'run'                      : function('FilteringDummyFunction'),
         \'return'                   : function('FilteringDummyFunction'),
