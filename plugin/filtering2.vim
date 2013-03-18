@@ -17,7 +17,7 @@
 "=============================================================================
 
 if exists("g:filtering2_version") || &cp
-    finish
+    " finish
 endif
 let g:filtering_version2 = '2.0beta1'
 
@@ -194,15 +194,12 @@ function! FilteringParseQuery(query, separator) dict"{{{
   endif
   return self
 endfunction"}}}
-function! FilteringGotoLineInBuffer(buffer_nr, line_nr, close) dict"{{{
+function! FilteringGotoLineInBuffer(buffer_nr, line_nr) dict"{{{
   if a:line_nr < 1
     return
   endif
   if a:buffer_nr == self.target
     return <SID>FancyError('Cannot follow result in target window. Programming error?')
-  endif
-  if a:close
-    bdelete
   endif
   call <SID>FlipToWindowOrLoadBufferHere(a:buffer_nr)
   exe 'normal! ' . a:line_nr . 'G'
@@ -239,10 +236,7 @@ function! FilteringGetCurrentLineSelection() dict"{{{
 endfunction"}}}
 function! FilteringDestruct() dict"{{{
   let start_buffer = bufnr('')
-  if bufexists(self.target)
-    call <SID>FlipToWindowOrLoadBufferHere(self.target)
-    bdelete
-  endif
+  exe 'silent! bdelete ' . self.target
   if bufexists(self.source)
     call <SID>FlipToWindowOrLoadBufferHere(self.source)
     if exists('b:filtering_source')
@@ -324,18 +318,18 @@ function! FilteringPrevResult() dict"{{{
 endfunction"}}}
 function! FilteringDone() dict"{{{
   if !empty(self.message)
-    call <SID>FancyEcho(self.message)
+    " call <SID>FancyEcho(self.message)
   endif
   let self.message = ''
   return self
 endfunction"}}}
 
 " Public methods (convenience).
-function! FilteringGotoSelectionInOriginal(close) dict"{{{
-  return self.gotoLineInBuffer(self.original, self.getCurrentLineSelection(), a:close)
+function! FilteringGotoSelectionInOriginal() dict"{{{
+  return self.gotoLineInBuffer(self.original, self.getCurrentLineSelection())
 endfunction"}}}
-function! FilteringGotoSelectionInSource(close) dict"{{{
-  return self.gotoLineInBuffer(self.source, self.getCurrentLineSelection(), a:close)
+function! FilteringGotoSelectionInSource() dict"{{{
+  return self.gotoLineInBuffer(self.source, self.getCurrentLineSelection())
 endfunction"}}}
 function! FilteringFollowSelectionInOriginal(blink_times) dict"{{{
   return self.followInBuffer(self.original, self.getCurrentLineSelection(), a:blink_times)
@@ -476,8 +470,8 @@ function! FilteringCreateNewWindow() dict"{{{
 endfunction"}}}
 function! FilteringSetKeyMappings() dict"{{{
   let s:mappingFilter = <SID>Def('g:filteringDefaultKeyMappings', [])
-  call <SID>Map('<CR>', 'call FilteringGetForTarget().gotoSelectionInOriginal(0).blink(1).done()')
-  call <SID>Map('<S-CR>', 'call FilteringGetForTarget().gotoSelectionInOriginal(1).destruct().blink(1).done()')
+  call <SID>Map('<CR>', 'call FilteringGetForTarget().gotoSelectionInOriginal().blink(1).done()')
+  call <SID>Map('<S-CR>', 'call FilteringGetForTarget().gotoSelectionInOriginal().destruct().blink(1).done()')
   call <SID>Map('<Esc>', 'call FilteringGetForTarget().destruct().done()')
   call <SID>Map('a', 'call FilteringGetForTarget().toggleAutoFollow("source").done()')
   call <SID>Map('A', 'call FilteringGetForTarget().toggleAutoFollow("original").done()')
