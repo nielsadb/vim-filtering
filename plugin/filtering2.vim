@@ -17,7 +17,7 @@
 "=============================================================================
 
 if exists("g:filtering2_version") || &cp
-    " finish
+    finish
 endif
 let g:filtering_version2 = '2.0beta1'
 
@@ -318,7 +318,7 @@ function! FilteringPrevResult() dict"{{{
 endfunction"}}}
 function! FilteringDone() dict"{{{
   if !empty(self.message)
-    " call <SID>FancyEcho(self.message)
+    call <SID>FancyEcho(self.message)
   endif
   let self.message = ''
   return self
